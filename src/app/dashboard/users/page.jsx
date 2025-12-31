@@ -5,7 +5,8 @@ export default function Users() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getData = async () => {
+  useEffect(() => {
+  const fetchUsers = async () => {
     try {
       const response = await fetch("https://dummyjson.com/users");
       const data = await response.json();
@@ -15,16 +16,15 @@ export default function Users() {
       console.log(error);
     }
   };
-  
-  useEffect(() => {
-    getData();
-  }, []);
+
+  fetchUsers();
+}, []);
 
 if (isLoading) {
   return (
     <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
       <table className="min-w-full bg-white">
-        <thead className="bg-gradient-to-r from-cyan-600 to-cyan-400 text-white">
+        <thead className="bg-linear-to-r from-cyan-600 to-cyan-400 text-white">
           <tr>
             <th className="py-3 px-6 text-left">ID</th>
             <th className="py-3 px-6 text-left">First Name</th>
@@ -61,7 +61,7 @@ if (isLoading) {
     <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
   <table className="min-w-full divide-y divide-gray-200 bg-white">
     
-    <thead className="bg-gradient-to-r from-cyan-600 to-cyan-400 text-white">
+    <thead className="bg-linear-to-r from-cyan-600 to-cyan-400 text-white">
       <tr className="uppercase text-sm font-medium tracking-wider">
         <th className="py-3 px-6 text-left">ID</th>
         <th className="py-3 px-6 text-left">First Name</th>

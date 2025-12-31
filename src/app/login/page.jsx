@@ -10,17 +10,21 @@ export default function Login() {
 
   const onSubmit = (data) => {
     if (data.password === "1234" && data.username === "admin") {
-      const expireTime = Date.now() + 30 * 60 * 1000;
+      const setAuth = () => {
+      const expireTime = Date.now() + 30 * 60 * 1000; // 30 دقیقه
       localStorage.setItem("auth", "true");
       localStorage.setItem("expiresAt", expireTime);
       router.push("/dashboard");
+    }
+
+    setAuth();
     } else {
       setError("Username or password is incorrect ❌");
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-cyan-600 via-cyan-700 to-cyan-900 p-6">
+    <div className="min-h-screen flex justify-center items-center bg-linear-to-br from-cyan-600 via-cyan-700 to-cyan-900 p-6">
       
       <form
         onSubmit={handleSubmit(onSubmit)}

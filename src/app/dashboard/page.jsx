@@ -1,44 +1,97 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Users from "./users/page";
 
-export default function Dashboard() {
-  const router = useRouter();
+export default function Users() {
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const auth = localStorage.getItem("auth");
-    const expiresAt = localStorage.getItem("expiresAt");
+    let isMounted = true; 
 
-    if (!auth || !expiresAt) {
-      router.push("/login");
-      return;
-    }
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("https://dummyjson.com/users");
+        const data = await response.json();
+        if (isMounted) {
+          setUsers(data.users);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
-    if (Date.now() > Number(expiresAt)) {
-      localStorage.removeItem("auth");
-      localStorage.removeItem("expiresAt");
-      router.push("/login");
-      return;
-    }
+    fetchUsers();
 
-    setIsLoading(false);
+    return () => {
+      isMounted = false; 
+    };
   }, []);
 
   if (isLoading) {
+   
+    return (
+      <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200 p-6">
+        <table className="min-w-full bg-white">
+          <thead className="bg-linear-to-r from-cyan-600 to-cyan-400 text-white">
+            <tr>
+              <th className="py-3 px-6 text-left">ID</th>
+              <th className="py-3 px-6 text-left">First Name</th>
+              <th className="py-3 px-6 text-left">Last Name</th>
+              <th className="py-3 px-6 text-left">Email</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <tr key={i} className="animate-pulse">
+                <td className="py-4 px-6">
+                  <div className="h-4 w-10 bg-gray-200 rounded"></div>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                </td>
+                <td className="py-4 px-6">
+                  <div className="h-4 w-52 bg-gray-200 rounded"></div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+
   return (
-    <div className="flex justify-center items-center h-80">
-      <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-      <span className="ml-4 text-lg text-cyan-700 font-semibold">
-        Loading dashboard...
-      </span>
+    <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 bg-white">
+        <thead className="bg-linear-to-r from-cyan-600 to-cyan-400 text-white">
+          <tr className="uppercase text-sm font-medium tracking-wider">
+            <th className="py-3 px-6 text-left">ID</th>
+            <th className="py-3 px-6 text-left">First Name</th>
+            <th className="py-3 px-6 text-left">Last Name</th>
+            <th className="py-3 px-6 text-left">Email</th>
+          </tr>
+        </thead>
+
+        <tbody className="divide-y divide-gray-100">
+          {users.map(({ id, firstName, lastName, email }) => (
+            <tr
+              key={id}
+              className="transition hover:bg-cyan-50 cursor-pointer"
+            >
+              <td className="py-4 px-6 font-semibold">{id}</td>
+              <td className="py-4 px-6">{firstName}</td>
+              <td className="py-4 px-6">{lastName}</td>
+              <td className="py-4 px-6 text-gray-700">{email}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
-
-
-  return (
-    <Users />
-  )
 }
