@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -9,6 +10,12 @@ export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
+
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
     let isMounted = true;
@@ -28,9 +35,7 @@ export default function Users() {
 
     fetchUsers();
 
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   const handleSort = (column) => {
@@ -42,25 +47,24 @@ export default function Users() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = useMemo(() =>
+    users.filter(user =>
+      user.firstName.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(debouncedQuery.toLowerCase())
+    ), [users, debouncedQuery]
   );
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     let valA = a[sortColumn];
     let valB = b[sortColumn];
-
     if (typeof valA === "string") valA = valA.toLowerCase();
     if (typeof valB === "string") valB = valB.toLowerCase();
-
     if (valA < valB) return sortOrder === "asc" ? -1 : 1;
     if (valA > valB) return sortOrder === "asc" ? 1 : -1;
     return 0;
   });
 
-  // Pagination
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedUsers = sortedUsers.slice(startIndex, startIndex + rowsPerPage);
   const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
@@ -78,7 +82,7 @@ export default function Users() {
             </tr>
           </thead>
           <tbody>
-            {[1, 2, 3, 4, 5].map((i) => (
+            {[1,2,3,4,5].map(i => (
               <tr key={i} className="animate-pulse">
                 <td className="py-4 px-6"><div className="h-4 w-10 bg-gray-200 rounded"></div></td>
                 <td className="py-4 px-6"><div className="h-4 w-32 bg-gray-200 rounded"></div></td>
@@ -105,35 +109,31 @@ export default function Users() {
       <table className="min-w-full divide-y divide-gray-200 bg-white">
         <thead className="bg-gradient-to-r from-cyan-600 to-cyan-400 text-white">
           <tr className="uppercase text-sm font-medium tracking-wider">
-            <th
-              className="py-3 px-6 cursor-pointer"
-              onClick={() => handleSort("id")}
-            >
-              ID {sortColumn === "id" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+            <th className="py-3 px-6 cursor-pointer">
+              <span className="inline-flex items-center" onClick={() => handleSort("id")}>
+                ID {sortColumn === "id" && (sortOrder==="asc"?<ChevronUp className="w-4 h-4 ml-1"/>:<ChevronDown className="w-4 h-4 ml-1"/>)}
+              </span>
             </th>
-            <th
-              className="py-3 px-6 cursor-pointer"
-              onClick={() => handleSort("firstName")}
-            >
-              First Name {sortColumn === "firstName" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+            <th className="py-3 px-6 cursor-pointer">
+              <span className="inline-flex items-center" onClick={() => handleSort("firstName")}>
+                First Name {sortColumn === "firstName" && (sortOrder==="asc"?<ChevronUp className="w-4 h-4 ml-1"/>:<ChevronDown className="w-4 h-4 ml-1"/>)}
+              </span>
             </th>
-            <th
-              className="py-3 px-6 cursor-pointer"
-              onClick={() => handleSort("lastName")}
-            >
-              Last Name {sortColumn === "lastName" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+            <th className="py-3 px-6 cursor-pointer">
+              <span className="inline-flex items-center" onClick={() => handleSort("lastName")}>
+                Last Name {sortColumn === "lastName" && (sortOrder==="asc"?<ChevronUp className="w-4 h-4 ml-1"/>:<ChevronDown className="w-4 h-4 ml-1"/>)}
+              </span>
             </th>
-            <th
-              className="py-3 px-6 cursor-pointer"
-              onClick={() => handleSort("email")}
-            >
-              Email {sortColumn === "email" ? (sortOrder === "asc" ? "▲" : "▼") : ""}
+            <th className="py-3 px-6 cursor-pointer">
+              <span className="inline-flex items-center" onClick={() => handleSort("email")}>
+                Email {sortColumn === "email" && (sortOrder==="asc"?<ChevronUp className="w-4 h-4 ml-1"/>:<ChevronDown className="w-4 h-4 ml-1"/>)}
+              </span>
             </th>
           </tr>
         </thead>
 
         <tbody className="divide-y divide-gray-100">
-          {paginatedUsers.map(({ id, firstName, lastName, email }) => (
+          {paginatedUsers.map(({id, firstName, lastName, email}) => (
             <tr key={id} className="transition hover:bg-cyan-50 cursor-pointer">
               <td className="py-4 px-6 font-semibold">{id}</td>
               <td className="py-4 px-6">{firstName}</td>
@@ -145,21 +145,9 @@ export default function Users() {
       </table>
 
       <div className="flex justify-center gap-4 mt-4">
-        <button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(prev => prev - 1)}
-          className="px-3 py-1 bg-cyan-500 text-white rounded disabled:opacity-50"
-        >
-          Prev
-        </button>
-        <span className="px-3 py-1">{currentPage} / {totalPages}</span>
-        <button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(prev => prev + 1)}
-          className="px-3 py-1 bg-cyan-500 text-white rounded disabled:opacity-50"
-        >
-          Next
-        </button>
+        <button disabled={currentPage===1} onClick={()=>setCurrentPage(prev=>prev-1)} className="px-3 py-1 bg-cyan-500 text-white rounded disabled:opacity-50">Prev</button>
+        <span className="px-3 py-1">{currentPage}/{totalPages}</span>
+        <button disabled={currentPage===totalPages} onClick={()=>setCurrentPage(prev=>prev+1)} className="px-3 py-1 bg-cyan-500 text-white rounded disabled:opacity-50">Next</button>
       </div>
     </div>
   );
