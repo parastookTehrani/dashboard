@@ -20,9 +20,43 @@ export default function Users() {
     getData();
   }, []);
 
-  if (isLoading) {
-    return <p>loading...</p>;
-  }
+if (isLoading) {
+  return (
+    <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
+      <table className="min-w-full bg-white">
+        <thead className="bg-gradient-to-r from-cyan-600 to-cyan-400 text-white">
+          <tr>
+            <th className="py-3 px-6 text-left">ID</th>
+            <th className="py-3 px-6 text-left">First Name</th>
+            <th className="py-3 px-6 text-left">Last Name</th>
+            <th className="py-3 px-6 text-left">Email</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {[1,2,3,4,5].map(i => (
+            <tr key={i} className="animate-pulse">
+              <td className="py-4 px-6">
+                <div className="h-4 w-10 bg-gray-200 rounded"></div>
+              </td>
+              <td className="py-4 px-6">
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              </td>
+              <td className="py-4 px-6">
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+              </td>
+              <td className="py-4 px-6">
+                <div className="h-4 w-52 bg-gray-200 rounded"></div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
   return (
     <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-200">
   <table className="min-w-full divide-y divide-gray-200 bg-white">
